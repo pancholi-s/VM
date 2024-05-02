@@ -1,0 +1,21 @@
+ifconfig
+{su root [dont use sudo]}
+
+sudo apt install net-tools
+
+touch shail.txt
+cat shail.txt
+nano shail.txt
+
+(ctrl+s, ctrl+x)
+
+sudo apt install openssh-server
+
+(cd/pwd on kali)
+(sudo service ssh start)
+
+scp shail.txt kali@10.0.2.15:/home/kali
+
+(cd/pwd on kali)
+(ls and cat)
+~lls
