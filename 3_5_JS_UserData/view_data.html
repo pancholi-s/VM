@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Entered Data</title>
+    <link href="view_data.css" rel="stylesheet">
+</head>
+
+<body>
+    <table border="1px" id="dataTable"></table>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            let dataTable = document.getElementById("dataTable")
+            let regData = JSON.parse(localStorage.getItem("regData")) || [];
+
+            let html =
+                `<tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Password</th>
+                </tr>`
+
+            regData.forEach(function (item) {
+                html +=
+                    `<tr>
+                    <td>${item.fullName}</td>
+                    <td>${item.email}</td>
+                    <td>${item.password}</td>
+                    </tr>`
+            });
+
+            dataTable.innerHTML = html;
+        })
+    </script>
+</body>
+
+</html>

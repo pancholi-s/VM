@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Data</title>
+    <link href="style.css" rel="stylesheet">
+</head>
+
+<body>
+    <form id="register">
+        <label for="fullName">Full Name:</label>
+        <br>
+        <input type="text" id="fullName" name="fullName" required>
+        <br>
+
+        <label for="email">Email:</label>
+        <br>
+        <input type="email" id="email" name="email" required>
+        <br>
+
+        <label for="password">Password:</label>
+        <br>
+        <input type="password" id="password" name="password" required>
+        <br><br>
+
+        <button type="submit">Register</button>
+    </form>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            let register = document.getElementById("register")
+
+            register.addEventListener("submit", function (event) {
+                event.preventDefault()
+                let fullName = document.getElementById("fullName").value
+                let email = document.getElementById("email").value
+                let password = document.getElementById("password").value
+
+                const object = {
+                    fullName: fullName,
+                    email: email,
+                    password: password
+                };
+
+                let regData = JSON.parse(localStorage.getItem("regData")) || [];
+                regData.push(object)
+
+                localStorage.setItem("regData", JSON.stringify(regData))
+                window.location.href = "view_data.html"
+            })
+        })
+    </script>
+</body>
+
+</html>

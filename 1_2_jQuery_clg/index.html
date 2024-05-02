@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PICT - Pune Institute of Computer Technology</title>
+    <link rel="stylesheet" href="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css">
+    <script src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
+    <script src="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+    <style>
+        .navbar {
+            display: flex;
+            justify-content: space-around;
+            background-color: blue;
+        }
+        .navbar a {
+            background-color: blue;
+            color: white;
+            text-align: center;
+            padding: 10px;
+            text-decoration: none;
+        }
+        .footer {
+            background-color: blue;
+            color: white;
+            text-align: center;
+            padding: 10px;
+        }
+        .header-text {
+            color: blue;
+            font-size: 30px;
+        }
+        .sub-header-text {
+            color: red;
+        }
+        .content-img {
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <!-- Home Page -->
+    <div data-role="page" id="home">
+        <div data-role="header" style="background-color: blue; color: white;">
+            <h1><img src="https://pict.edu/images/pic.jpg" alt="PICT Logo" height="40"> PUNE INSTITUTE OF COMPUTER TECHNOLOGY</h1>
+        </div>
+
+        <div class="navbar">
+            <a href="#home">Home</a>
+            <a href="#about">About Us</a>
+            <a href="#departments">Departments</a>
+            <a href="#admissions">Admissions</a>
+            <a href="#placement">Placements</a>
+            <a href="#research">Research</a>
+        </div>
+
+        <div data-role="content">
+            <center>
+                <h2 class="header-text">Welcome to PICT</h2>
+                <p class="sub-header-text">An Autonomous Institute Affiliated to Savitribai Phule Pune University</p>
+                <img src="./images/temp1.jpg" class="content-img" alt="Campus Image">
+                <h2>PICT at a Glance</h2>
+                <img src="./images/temp2.jpg" class="content-img" alt="Management Team">
+                <h2>Our Management</h2>
+                <img src="./images/temp3.jpg" class="content-img" alt="Campus Facilities">
+            </center>
+        </div>
+
+        <div data-role="footer" class="footer">
+            <p>Society for Computer Technology and Research | AICTE APPROVED | ISO 9001 2015 | NAAC A+ Grade</p>
+        </div>
+    </div>
+
+    <!-- About Us Page -->
+    <div data-role="page" id="about">
+        <div data-role="header" style="background-color: blue; color: white;">
+            <h1>About PICT</h1>
+        </div>
+
+        <div class="navbar">
+            <a href="#home">Home</a>
+            <a href="#about">About Us</a>
+            <a href="#departments">Departments</a>
+        </div>
+
+        <div data-role="content">
+            <h2>Vision</h2>
+            <p>Pune Institute of Computer Technology aspires to be a leader in Higher technical education and research of International repute.</p>
+
+            <h2>Mission</h2>
+            <p>To be the leading and the most sought-after institute of education and research in emerging engineering and technology disciplines that attract, retain, and sustain gifted individuals of significant potential.</p>
+        </div>
+
+        <div data-role="footer" class="footer">
+            <p>Quick Access: <a href="#home">Home</a> | <a href="#about">About Us</a> | <a href="#departments">Departments</a></p>
+        </div>
+    </div>
+
+    <!-- Departments Page -->
+    <div data-role="page" id="departments">
+        <div data-role="header" style="background-color: blue; color: white;">
+            <h1>Departments</h1>
+        </div>
+
+        <div class="navbar">
+            <a href="#home">Home</a>
+            <a href="#about">About Us</a>
+            <a href="#departments">Departments</a>
+        </div>
+
+        <div data-role="content">
+            <ul data-role="listview">
+                <li><a href="#fye">First Year Engineering</a></li>
+                <li>Information Technology</li>
+                <li>Computer Engineering</li>
+                <li>Electronics and Telecommunication Engineering</li>
+            </ul>
+        </div>
+
+        <div data-role="footer" class="footer">
+            <p>Quick Access: <a href="#home">Home</a> | <a href="#about">About Us</a> | <a href="#departments">Departments</a></p>
+        </div>
+    </div>
+</body>
+</html>
