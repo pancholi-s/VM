@@ -1,0 +1,38 @@
+1. create new java project, then create right on src and create new package and then right click on package create new class(give same names to everyone preferably)
+
+2.add package file_name; to top of code and change the names in the code to our file name(at 2places)
+
+3. add 3 external archive (right click on project and go to build path->add external archives
+	Path:
+•	File System/usr/lib/hadoop/hadoop-common.jar
+•	File System/usr/lib/hadoop/client/commons-cli-1.2.jar
+•	File System/usr/lib/Hadoop/client-0.20/hadoop-core.jar
+
+4.		Export the project in JAR file after everytime any changes are done
+                Ex. movie.jar (right click on project and go to export and click on jar file)
+
+5.    open terminal and execute following commands
+		create textfile for wordcount if needed(touch and then gedit )
+		
+        ->hadoop fs -put movie.csv movie.csv (or any different name)
+	->(Hadoop jar jarfilename.jar packageName.ClassName  PathToInputTextFile 				PathToOutputDirectry)
+
+
+	[training@localhost ~]$ hadoop jar MRProgramsDemo.jar PackageDemo.WordCount 	wordCountFile MRDir1
+         ->[training@localhost ~]$ hadoop fs -ls MRDir1
+
+	Found 3 items
+
+	-rw-r--r--   1 training supergroup          0 2016-02-23 03:36 /user/training/MRDir1/	_SUCCESS
+	drwxr-xr-x   - training supergroup          0 2016-02-23 03:36 /user/training/MRDir1/	_logs
+	-rw-r--r--   1 training supergroup         20 2016-02-23 03:36 			/user/training/MRDir1/part-r-00000
+	
+	->[training@localhost ~]$ hadoop fs -cat MRDir1/part-r-00000
+BUS     7
+CAR     4
+TRAIN   6
+
+Devices > Shared Folders > settings
+
+Terminal sudo su (password > cloudera)
+mount -t vboxsf {name of shared folder} > make new folder on desktop > paste path name here

@@ -1,0 +1,147 @@
+**Write an application using HBase and HiveQL for flight information system which will 
+include 
+a. Create Flight Info Hbase Table(with Flight information, schedule, and delay) 
+b. Demonstrate Creating, Dropping, and altering Database tables in Hbase 
+c. Creating an external Hive table to connect to the HBase for Flight Information Table 
+d. Find the total departure delay  in Hive 
+e. Find the average departure delay in Hive 
+f. Create index on Flight information Table**
+
+{
+sudo su
+service hbase-master restart (status)
+service hbase-regionserver restart (status)
+}
+
+IN TERMINAL 1 - 
+
+[cloudera@quickstart ~]$ hbase shell
+
+hbase(main):001:0> create 'flight','finfo','fsch','delay';
+
+hbase(main):001:0> list
+
+
+hbase(main):005:0> put 'flight',1,'finfo:source','Mumbai'
+hbase(main):005:0> put 'flight',1,'finfo:dest','Pune'
+hbase(main):005:0> put 'flight',1,'finfo:year','2003'
+hbase(main):005:0> put 'flight',1,'fsch:at','9'
+hbase(main):005:0> put 'flight',1,'fsch:dt','11'
+hbase(main):005:0> put 'flight',1,'delay:delay_mins','10'
+
+
+hbase(main):005:0> put 'flight',2,'finfo:source','Nagar'
+hbase(main):005:0> put 'flight',2,'finfo:dest','Pune'
+hbase(main):005:0> put 'flight',2,'finfo:year','2004'
+hbase(main):005:0> put 'flight',2,'fsch:at','10'
+hbase(main):005:0> put 'flight',2,'fsch:dt','12'
+hbase(main):005:0> put 'flight',2,'delay:delay_mins','20'
+
+hbase(main):001:0> scan 'flight'
+
+hbase(main):004:0> alter 'flight' ,{NAME=>'fcapacity'}
+
+hbase(main):005:0> put 'flight',1,'fcapacity:size','500'
+
+hbase(main):006:0> put 'flight',2,'fcapacity:size','600'
+
+hbase(main):007:0> scan 'flight'
+ROW                                                          COLUMN+CELL                                                                                                                                                                     
+ 1                                                           column=delay:delay_mins, timestamp=1715182827060, value=10                                                                                                                      
+ 1                                                           column=fcapacity:size, timestamp=1715188388479, value=500                                                                                                                       
+ 1                                                           column=finfo:dest, timestamp=1715182452333, value=Pune                                                                                                                          
+ 1                                                           column=finfo:source, timestamp=1715182428521, value=Mumbai                                                                                                                      
+ 1                                                           column=finfo:year, timestamp=1715182653896, value=2003                                                                                                                          
+ 1                                                           column=fsch:at, timestamp=1715182692669, value=9                                                                                                                                
+ 1                                                           column=fsch:dt, timestamp=1715182708572, value=11                                                                                                                               
+ 2                                                           column=delay:delay_mins, timestamp=1715183076444, value=20                                                                                                                      
+ 2                                                           column=fcapacity:size, timestamp=1715188399327, value=600                                                                                                                       
+ 2                                                           column=finfo:dest, timestamp=1715182997230, value=Pune                                                                                                                          
+ 2                                                           column=finfo:source, timestamp=1715182865530, value=Nagar                                                                                                                       
+ 2                                                           column=finfo:year, timestamp=1715183014524, value=2004                                                                                                                          
+ 2                                                           column=fsch:at, timestamp=1715183044305, value=10                                                                                                                               
+ 2                                                           column=fsch:dt, timestamp=1715183058385, value=12                                                                                                                               
+2 row(s) in 0.2090 seconds
+
+
+Showing drop table query - 
+hbase(main):002:0> create 'dummy','dummyinfo';
+hbase(main):003:0* list
+0 row(s) in 3.0830 seconds
+
+TABLE                                                                                                                                                                                                                                        
+dummy                                                                                                                                                                                                                                        
+flight                                                                                                                                                                                                                                       
+2 row(s) in 0.0590 seconds
+
+=> ["dummy", "flight"]
+hbase(main):004:0> disable 'dummy'
+0 row(s) in 1.6400 seconds
+
+hbase(main):005:0> drop 'dummy'
+0 row(s) in 0.6730 seconds
+
+hbase(main):006:0> list
+TABLE                                                                                                                                                                                                                                        
+flight                                                                                                                                                                                                                                       
+1 row(s) in 0.0250 seconds
+
+=> ["flight"]
+hbase(main):007:0> 
+
+
+IN TERMINAL 2 -
+
+[cloudera@quickstart ~]$ hive
+
+hive> create external table flighthive (
+    > flight_id INT,
+    > delay_mins INT,
+    > size INT,
+    > source STRING,
+    > dest STRING,
+    > year INT,
+    > at INT,
+    > dt INT
+    > )
+    > STORED BY 'org.apache.hadoop.hive.hbase.HBaseStorageHandler'
+    > WITH SERDEPROPERTIES ( "hbase.columns.mapping" = ":key,delay:delay_mins,fcapacity:size,finfo:dest,finfo:source,finfo:year,fsch:at,fsch:dt")
+    > TBLPROPERTIES ("hbase.table.name" = "flight");
+OK
+Time taken: 13.836 seconds
+
+
+hive> SELECT * from flighthive;
+OK
+1	10	500	Pune	Mumbai	2003	9	11
+2	20	600	Pune	Nagar	2004	10	12
+
+
+hive> SELECT SUM(delay_mins) AS total_dep_delay FROM flighthive;
+#NOTE : here, after printing mapreduce job lines finally output sum will be printed
+Total MapReduce CPU Time Spent: 18 seconds 810 msec
+OK
+30.0
+Time taken: 167.92 seconds, Fetched: 1 row(s)
+
+
+hive> SELECT AVG(delay_mins) AS avg_dep_delay FROM flighthive;
+#NOTE : here, after printing mapreduce job lines finally output avg will be printed
+Total MapReduce CPU Time Spent: 18 seconds 540 msec
+OK
+15.0
+Time taken: 107.725 seconds, Fetched: 1 row(s)
+
+
+
+
+hive> create index flight_index 
+    > on table flighthive(delay_mins)
+    > as 'org.apache.hadoop.hive.ql.index.compact.CompactIndexHandler'
+    > with deferred rebuild;
+OK
+Time taken: 3.02 seconds
+hive> show index on flighthive;
+OK
+flight_index        	flighthive          	delay_mins          	default__flighthive_flight_index__	compact             	
+Time taken: 0.591 seconds, Fetched: 1 row(s)

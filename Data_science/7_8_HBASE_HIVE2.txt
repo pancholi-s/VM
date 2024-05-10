@@ -1,0 +1,314 @@
+**Write an application using HBase and HiveQL for Customer information system which will 
+include 
+a. Creation of –Cutomer_info(Cust-ID,Cust-Name,orderID), 
+order_info(OrderID,ItemID,Quantity), item_info(Item-ID,Item-Name,ItemPrice) 
+tables in Hive 
+b. Load table with data from local storage in Hive. 
+c. Perform Join tables with Hive 
+d. Create Index on Customer information system in Hive. 
+e. Find the total, average sales  in Hive 
+f. Find Order details with maximum cost. 
+g. Creating an external Hive table to connect to the HBase for Customer Information 
+System. 
+h. Display records of Customer Information Table in Hbase.**
+
+
+
+[cloudera@quickstart ~]$ hive
+
+Logging initialized using configuration in file:/etc/hive/conf.dist/hive-log4j.properties
+WARNING: Hive CLI is deprecated and migration to Beeline is recommended.
+
+a. Creation of –Cutomer_info(Cust-ID,Cust-Name,orderID), 
+order_info(OrderID,ItemID,Quantity), item_info(Item-ID,Item-Name,ItemPrice) 
+tables in Hive 
+
+hive> create table customer_info (  {add country}
+    > cust_id INT,
+    > cust_name STRING,
+    > order_id INT
+    > )
+    > row format delimited
+    > fields terminated by ',';
+OK
+Time taken: 1.333 seconds
+hive> create table order_info (
+    > order_id INT,
+    > item_id INT,
+    > quantity INT
+    > )
+    > row format delimited
+    > fields terminated by ',';
+OK
+Time taken: 0.645 seconds
+hive> create table item_info (
+    > item_id INT,
+    > item_name STRING,
+    > item_price INT
+    > )
+    > row format delimited
+    > fields terminated by ',';
+OK
+Time taken: 0.332 seconds
+hive> show tables;
+OK
+customer_info
+default__flighthive_flight_index__
+flighthive
+item_info
+order_info
+Time taken: 0.674 seconds, Fetched: 5 row(s)
+
+b. Load table with data from local storage in Hive. 
+
+CREATION OF FILES IN ANOTHER TERMINAL 
+(content of file example - 
+	data_customer_info.txt
+
+	1,John Doe,1001
+	2,Jane Smith,1002
+	3,Alice Johnson,1003
+	4,Bob Brown,1004
+)
+	
+[cloudera@quickstart ~]$ cd Desktop
+[cloudera@quickstart Desktop]$ ls
+data_customer_info.txt   data_item_info.txt   data_order_info.txt   Eclipse.desktop     Express.desktop
+data_customer_info.txt~  data_item_info.txt~  data_order_info.txt~  Enterprise.desktop
+[cloudera@quickstart Desktop]$ hadoop fs -put data_customer_info.txt data_customer_info.txt
+[cloudera@quickstart Desktop]$ hadoop fs -put data_order_info.txt data_order_info.txt
+[cloudera@quickstart Desktop]$ hadoop fs -put data_item_info.txt data_item_info.txt
+[cloudera@quickstart Desktop]$ hadoop fs -ls
+Found 3 items
+-rw-r--r--   1 cloudera cloudera         73 2024-05-08 12:33 data_customer_info.txt
+-rw-r--r--   1 cloudera cloudera         80 2024-05-08 12:35 data_item_info.txt
+-rw-r--r--   1 cloudera cloudera         45 2024-05-08 12:34 data_order_info.txt
+[cloudera@quickstart Desktop]$ 
+
+
+hive> load data inpath 'data_customer_info.txt' into table customer_info;
+
+hive> load data inpath 'data_order_info.txt' into table order_info;
+
+hive> load data inpath 'data_item_info.txt' into table item_info;
+
+
+hive> select * from customer_info;
+OK
+1	John Doe	1001
+2	Jane Smith	1002
+3	Alice Johnson	1003
+4	Bob Brown	1004
+NULL	NULL	NULL
+Time taken: 1.445 seconds, Fetched: 5 row(s)
+hive> select * from order_info;
+OK
+1001	101	2
+1002	102	1
+1003	103	3
+1004	104	2
+NULL	NULL	NULL
+Time taken: 0.168 seconds, Fetched: 5 row(s)
+hive> select * from item_info;
+OK
+101	Product A	10
+102	Product B	15
+103	Product C	5
+104	Product D	20
+NULL	NULL	NULL
+Time taken: 0.148 seconds, Fetched: 5 row(s)
+
+
+c. Perform Join tables with Hive 
+
+hive> select * from customer_info c
+    > join order_info o on c.order_id = o.order_id
+    > join item_info i on o.item_id = i.item_id;
+
+#NOTE : after printing some mapreduce execution lines finally output will be printed here
+Total MapReduce CPU Time Spent: 8 seconds 490 msec
+OK
+1	John Doe	1001	1001	101	2	101	Product A	10
+2	Jane Smith	1002	1002	102	1	102	Product B	15
+3	Alice Johnson	1003	1003	103	3	103	Product C	5
+4	Bob Brown	1004	1004	104	2	104	Product D	20
+Time taken: 148.522 seconds, Fetched: 4 row(s)
+
+
+d. Create Index on Customer information system in Hive. 
+
+hive> create index customer_index on table customer_info(cust_id) as 'compact' with deferred rebuild;
+OK
+Time taken: 1.436 seconds
+
+hive> show tables;
+OK
+customer_info
+default__customer_info_customer_index__
+default__flighthive_flight_index__
+flighthive
+item_info
+order_info
+Time taken: 0.068 seconds, Fetched: 6 row(s)
+hive> 
+
+e. Find the total, average sales  in Hive 
+
+hive> select sum(quantity * item_price) as total_sales,
+    > avg(quantity* item_price) as avg_sales
+    > from order_info o
+    > join item_info i on o.item_id = i.item_id;
+Total MapReduce CPU Time Spent: 12 seconds 0 msec
+OK
+90	22.5
+Time taken: 125.491 seconds, Fetched: 1 row(s)
+
+
+f. Find Order details with maximum cost. 
+
+hive> select * from order_info o
+    > join item_info i on o.item_id = i.item_id
+    > order by (quantity * item_price) desc {/remove desc, for bottom [desc is for top]}
+    > limit 1; {count = 1 here}
+
+
+Total MapReduce CPU Time Spent: 14 seconds 930 msec
+OK
+1004	104	2	104	Product D	20
+Time taken: 89.502 seconds, Fetched: 1 row(s)
+
+
+g. Creating an external Hive table to connect to the HBase for Customer Information 
+System. 
+
+first in hbase create a CustomerInfo table -
+
+hbase(main):001:0> create 'CustomerInfo', 'cinfo';
+
+hive> create external table customerinfohbase (
+    > cust_id INT,
+    > cust_name STRING,
+    > order_id INT
+    > )
+    > STORED BY 'org.apache.hadoop.hive.hbase.HBaseStorageHandler'
+    > WITH SERDEPROPERTIES (
+    > "hbase.columns.mapping" = ":key,cinfo:cust_name,cinfo:order_id")
+    > TBLPROPERTIES ("hbase.table.name" = "CustomerInfo");
+OK
+Time taken: 0.883 seconds
+
+hive> insert into table customerinfohbase
+    > select * from customer_info where cust_id is not null and cust_name is not null and order_id is not null;
+
+Total MapReduce CPU Time Spent: 9 seconds 60 msec
+OK
+Time taken: 74.925 seconds
+
+
+
+h. Display records of Customer Information Table in Hbase. 
+
+hbase(main):004:0> scan 'CustomerInfo'
+ROW                   COLUMN+CELL                                               
+ 1                    column=cinfo:cust_name, timestamp=1715202213930, value=Joh
+                      n Doe                                                     
+ 1                    column=cinfo:order_id, timestamp=1715202213930, value=1001
+ 2                    column=cinfo:cust_name, timestamp=1715202213930, value=Jan
+                      e Smith                                                   
+ 2                    column=cinfo:order_id, timestamp=1715202213930, value=1002
+ 3                    column=cinfo:cust_name, timestamp=1715202213930, value=Ali
+                      ce Johnson                                                
+ 3                    column=cinfo:order_id, timestamp=1715202213930, value=1003
+ 4                    column=cinfo:cust_name, timestamp=1715202213930, value=Bob
+                       Brown                                                    
+ 4                    column=cinfo:order_id, timestamp=1715202213930, value=1004
+4 row(s) in 0.2760 seconds
+
+
+~~~~~~~~~~~~~~~~~~~~~~
+
+i. Create and Load table with Online Retail data in Hive:
+Assuming you have the Online Retail data file named online_retail.csv, you can create and load the table as follows:
+
+$ hive
+hive> CREATE TABLE OnlineRetail (
+      InvoiceNo STRING,
+      StockCode STRING,
+      Description STRING,
+      Quantity INT,
+      InvoiceDate STRING,
+      UnitPrice DOUBLE,
+      CustomerID INT,
+      Country STRING)
+ROW FORMAT DELIMITED
+FIELDS TERMINATED BY ','
+STORED AS TEXTFILE;
+
+hive> LOAD DATA LOCAL INPATH '/path/to/online_retail.csv' INTO TABLE OnlineRetail;
+
+
+j. Create an index on the Online Retail table in Hive:
+
+$ hive
+hive> CREATE INDEX idx_online_retail ON TABLE OnlineRetail (InvoiceNo) AS 'COMPACT' WITH DEFERRED REBUILD;
+hive> ALTER INDEX idx_online_retail ON OnlineRetail REBUILD;
+
+k. Find the total and average sales in Hive:
+
+$ hive
+hive> SELECT SUM(Quantity * UnitPrice) AS total_sales, AVG(Quantity * UnitPrice) AS avg_sales
+      FROM OnlineRetail;
+
+l. Find Order details with maximum cost:
+
+$ hive
+hive> SELECT * FROM OnlineRetail
+      WHERE (Quantity * UnitPrice) = (SELECT MAX(Quantity * UnitPrice) FROM OnlineRetail);
+
+m. Find Customer details with maximum order total:
+
+$ hive
+hive> SELECT CustomerID, SUM(Quantity * UnitPrice) AS order_total
+      FROM OnlineRetail
+      GROUP BY CustomerID
+      ORDER BY order_total DESC
+      LIMIT 1;
+
+n. Find the Country with maximum and minimum sale:
+
+$ hive
+hive> SELECT Country, SUM(Quantity * UnitPrice) AS total_sales
+      FROM OnlineRetail
+      GROUP BY Country
+      ORDER BY total_sales DESC
+      LIMIT 1;
+
+hive> SELECT Country, SUM(Quantity * UnitPrice) AS total_sales
+      FROM OnlineRetail
+      GROUP BY Country
+      ORDER BY total_sales ASC
+      LIMIT 1;
+
+
+o. Creating an external Hive table to connect to HBase for OnlineRetail:
+
+$ hive
+hive> CREATE EXTERNAL TABLE OnlineRetailHBase (
+      InvoiceNo STRING,
+      StockCode STRING,
+      Description STRING,
+      Quantity INT,
+      InvoiceDate STRING,
+      UnitPrice DOUBLE,
+      CustomerID INT,
+      Country STRING)
+STORED BY 'org.apache.hadoop.hive.hbase.HBaseStorageHandler'
+WITH SERDEPROPERTIES (
+      "hbase.columns.mapping" = ":key,OnlineRetail:stock_code,OnlineRetail:description,OnlineRetail:quantity,OnlineRetail:invoice_date,OnlineRetail:unit_price,OnlineRetail:customer_id,OnlineRetail:country")
+TBLPROPERTIES ("hbase.table.name" = "OnlineRetail");
+
+
+p. Display records of OnlineRetail Table in HBase:
+
+$ hbase shell
+hbase> scan 'OnlineRetail'
