@@ -1,1 +1,3 @@
-https://github.com/RupeshKharche/BE-DL-Assignments
+https://github.com/meghadandapat/BE-IT-DS
+
+https://github.com/HarshvardhanP01/Distributed-Systems
