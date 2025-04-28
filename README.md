@@ -115,4 +115,9 @@ Assignmnet 6:
 
 
 Assignment 7:
+    link 1:
+    (https://www.youtube.com/watch?v=ASd1S-_HLWw&list=PL1ysxTqY226jlhxh31xMYS72CqC5_vodG&index=2)
+
+    link 2:
+    (https://www.youtube.com/watch?v=0z-HvSfr-M4)
     
